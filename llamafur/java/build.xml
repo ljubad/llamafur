@@ -1,5 +1,18 @@
 <project name="unexpectedness" default="jar" basedir="." xmlns:ivy="antlib:org.apache.ivy.ant" xmlns:artifact="antlib:org.apache.maven.artifact.ant">
 
+	
+	<target name="bootstrap" description="Used to install the ivy task jar">
+	    <mkdir dir="${user.home}/.ant/lib"/>
+	    <get dest="${user.home}/.ant/lib/ivy.jar" src="http://search.maven.org/remotecontent?filepath=org/apache/ivy/ivy/2.4.0/ivy-2.4.0.jar"/>
+		<!-- https://stackoverflow.com/questions/9853851/ivy-fails-to-resolve-a-dependency-unable-to-find-cause -->
+	</target>
+	
+	<target name="init-ivy">
+		<taskdef resource="org/apache/ivy/ant/antlib.xml"
+				uri="antlib:org.apache.ivy.ant"
+				classpath="ivy.jar"/>
+	</target>
+	
 	<property name="build.sysclasspath" value="ignore"/>
 	<property name="jars.dir" value="${basedir}/jars"/>
 	<property file="build.properties"/>

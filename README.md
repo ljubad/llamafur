@@ -35,6 +35,8 @@ If the environment is set up properly, you should install git and download this 
 
 and then go to the directory `llamafur/java`. There, run:
 
+
+* `ant bootstrap` to setup ivy plugin for ant
 * `ant ivy-setupjars` to download dependencies
 * `ant` to compile
 * `. setcp.sh` to include the produced Jar `unexpectedness-1.0.jar` inside the Java classpath.
