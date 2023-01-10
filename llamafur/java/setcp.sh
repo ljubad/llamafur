@@ -1,5 +1,5 @@
 JAR=unexpectedness-1.0.jar
-sourcedir=$(cd $(dirname ${BASH_ARGV[0]}) && pwd) 
+sourcedir=$(pwd) 
 count=$(\ls -1 ./$JAR 2>/dev/null | wc -l)
 
 if (( count == 0 )); then

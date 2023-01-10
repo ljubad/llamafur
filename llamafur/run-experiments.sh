@@ -1,6 +1,6 @@
-
+#!/usr/bin/env zsh
 ############### INITIALIZATION ################################################
-WIKIDUMP_XML=dump/enwiki-20140203-pages-articles.xml
+WIKIDUMP_XML=/vagrant/enwiki-20140203-pages-articles.xml
 STOPWORDS=stopwords.txt
 N_TOP_CATEGORIES=20000
 SEED=1234567890
@@ -8,7 +8,7 @@ SEED=1234567890
 # The current directory should look like this:
 # ./stopwords.txt                           # <---- stopwords, one per line
 # ./dump
-# ./dump/enwiki-20140203-pages-articles.xml # <---- the wikipedia dump
+# /vagrant/enwiki-20140203-pages-articles.xml # <---- the wikipedia dump
 # ./run-experiments.sh                      # <---- this script
 # ./evaluation
 # ./evaluation/pool.txt                     # <---- specifies which scorers should be evaluated
@@ -46,7 +46,7 @@ rm pages-with-selfloop*
 # Generate the Archive4j archive with textual data for text-based scorers
 mkdir text-archive
 cd text-archive
-java efen.parsewiki.WikipediaTextArchiveProducer ../$WIKIDUMP_XML ../$STOPWORDS Archive
+java efen.parsewiki.WikipediaTextArchiveProducer $WIKIDUMP_XML ../$STOPWORDS Archive
 cat Archive.terms | java it.unimi.dsi.util.FrontCodedStringList Archive.termmap.inverted
 cd ..
 
@@ -63,9 +63,9 @@ cd ..
 
 
 ############### LEARNING LLAMAFUR MATRIX #######################################
-mkdir llamafur
-cd llamafur
-java efen.scorers.llamafur.LatentMatrixEstimator ../top-categories/top-page2cat.ser ../pages.graph llamafur-w --seed $SEED -k 2 -m $N_TOP_CATEGORIES --savestats accuracy-recall.tsv
+mkdir llamafurmatrix
+cd llamafurmatrix
+java efen.scorers.llamafur.LatentMatrixEstimator ../top-categories/top-page2cat.ser ../pages.graph llamafur-w --seed 1234567890 -k 2 -m 20000 --savestats accuracy-recall.tsv
 java efen.scorers.llamafur.NaiveMatrixEstimator ../top-categories/top-page2cat.ser ../pages.graph naive-llamafur-w.ser
 cd ..
 
@@ -73,17 +73,17 @@ cd ..
 #cd evaluation
 #java efen.scorers.ScorerStatisticsSummarizer "scorers.aa.AdamicAdarScorer(../pages)" AdamicAdar-stats.properties
 #java efen.scorers.ScorerStatisticsSummarizer "scorers.textual.JacquenetM4Scorer(../pages, ../text-archive/Archive.archive)" JacquenetM4-stats.properties
-#java efen.scorers.ScorerStatisticsSummarizer "scorers.llamafur.LlamaFurScorer(../pages, ../llamafur/llamafur-w-1.ser, ../top-categories/top-page2cat.ser, LlamaFur)" LlamaFur-stats.properties
+#java efen.scorers.ScorerStatisticsSummarizer "scorers.llamafur.LlamaFurScorer(../pages, ../llamafurmatrix/llamafur-w-1.ser, ../top-categories/top-page2cat.ser, LlamaFur)" LlamaFur-stats.properties
 #cd ..
 
 
 ############### EVALUATING RESULTS #############################################
 cd evaluation
-java efen.scorers.llamafur.classifier.evaluation.TestMatrix 200 10000 ../llamafur/llamafur-w-1.ser ../pages.graph ../top-categories/top-page2cat.ser 1 | tee >(grep -v INFO > test-matrix.txt)
+java efen.scorers.llamafur.classifier.evaluation.TestMatrix 200 10000 ../llamafurmatrix/llamafur-w-1.ser ../pages.graph ../top-categories/top-page2cat.ser 1 | tee >(grep -v INFO > test-matrix.txt)
 java efen.evaluation.createdataset.PooledDatasetChecker pool.txt ../pageName2Id.ser human-evaluation.tsv | tee >(grep -v INFO > dataset-check.txt)
 java efen.evaluation.measure.BPrefMeasure pool.txt human-evaluation.tsv ../pageName2Id.ser -o bprefs.tsv -n ../pageId2Name.ser | tee >(grep -v INFO > avg-bpref.txt)
 java efen.evaluation.measure.PrecisionRecallPlot pool.txt human-evaluation.tsv ../pageName2Id.ser -o precision-recall.tsv -n ../pageId2Name.ser
-java efen.analysis.ScorerComparison ../pageName2Id.ser human-evaluation.tsv llamafur-vs-human.tsv "scorers.llamafur.LlamaFurScorer(../pages, ../llamafur/llamafur-w-1.ser, ../top-categories/top-page2cat.ser, LlamaFur)"
+java efen.analysis.ScorerComparison ../pageName2Id.ser human-evaluation.tsv llamafur-vs-human.tsv "scorers.llamafur.LlamaFurScorer(../pages, ../llamafurmatrix/llamafur-w-1.ser, ../top-categories/top-page2cat.ser, LlamaFur)"
 cd ..
 
 echo "Results available in directory 'evaluation'"

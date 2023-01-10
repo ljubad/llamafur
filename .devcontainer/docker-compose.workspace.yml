@@ -1,0 +1,19 @@
+version: '3'
+networks:
+  default:
+    name: newnetwork
+services:
+  workspace:
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ..:/home/vscode/workspace/llamafur/
+      - ~/.zshrc:/home/vscode/.zshrc
+      - ~/.oh-my-zsh/:/home/vscode/.oh-my-zsh/
+      - ~/.zsh_history:/home/vscode/.zsh_history
+      - /vagrant/enwiki-20140203-pages-articles.xml:/vagrant/enwiki-20140203-pages-articles.xml
+    # depends_on:
+    #   - kafka
+    tty: true

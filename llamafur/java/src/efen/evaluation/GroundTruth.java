@@ -95,6 +95,7 @@ public class GroundTruth {
 						if (relevantdocs == null || relevantdocs == IntSets.EMPTY_SET) {
 							relevantdocs = new IntOpenHashSet();
 							query2relevantdocs.put(fromPage, relevantdocs);
+							LOGGER.error("From page -> " + tokens[0] + " to page -> " + tokens[1]);
 						}
 						relevantdocs.add(toPage);
 					}
